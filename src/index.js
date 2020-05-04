@@ -14,46 +14,37 @@ function getShoppingCart(ids, productsList) {
 	};
 }
 
-function getProductsCardSumary(products) {
-	return products.map(product => ({
+function getProductsCardSumary(productsCart) {
+	return productsCart.map(product => ({
 		name: product.name,
 		category: product.category
 	}))
 }
 
-function findProductsByIds(products, ids) {
-	return ids.map(id => getProductById(products, id))
+function findProductsByIds(productsList, ids) {
+	return ids.map(id => getProductById(productsList, id))
 }
 
-function getProductById(products, id) {
-	return products.find(product => product.id == id)
+function getProductById(productsList, id) {
+	return productsList.find(product => product.id === id)
 }
 
-function getPromotionByProducts(products) {
+function getPromotionByProducts(productsCart) {
 	const categories = []
-	products.map(product => {
+	productsCart.forEach(product => {
 		if (!categories.includes(product.category)) {
 			categories.push(product.category)
 		}		
 	})
 
-	switch (categories.length) {
-		case 1:
-			return promotions[0]
-		case 2:
-			return promotions[1]
-		case 3:
-			return promotions[2]
-		case 4:
-			return promotions[3]
-	}
+	return promotions[categories.length - 1]
 }
 
-function calcTotalsCart(productsCart, promotion) {
+function calcTotalsCart(productsCart, promotionCart) {
 	let totalCart = 0
 	let totalCartWithDiscount = 0
-	productsCart.map(product => {
-		const discount = getProductDiscount(product, promotion)
+	productsCart.forEach(product => {
+		const discount = getProductDiscount(product, promotionCart)
 		const price = discount || product.regularPrice
 	
 		totalCartWithDiscount += price
@@ -61,20 +52,20 @@ function calcTotalsCart(productsCart, promotion) {
 	})
 	
 	const totalDiscount = totalCart - totalCartWithDiscount
-	const percentDiscount = 100 - ((totalCartWithDiscount * 100) / totalCart)
+	const percentDiscount = (totalDiscount * 100) / totalCart
 
 	return {
-		totalPrice: totalCartWithDiscount.toFixed(2).toString(),
-		discountValue: totalDiscount.toFixed(2).toString(),
-		discount: percentDiscount.toFixed(2).toString() + "%"
+		totalPrice: totalCartWithDiscount.toFixed(2),
+		discountValue: totalDiscount.toFixed(2),
+		discount: `${percentDiscount.toFixed(2)}%`
 	}
 }
 
-function getProductDiscount(product, promotion) {
+function getProductDiscount(product, promotionCart) {
 	let discount = 0
-	product.promotions.map(p => {
-		if (p.looks.includes(promotion)) {
-			discount = p.price
+	product.promotions.forEach(promotion => {
+		if (promotion.looks.includes(promotionCart)) {
+			discount = promotion.price
 		}
 	})
 	return discount
